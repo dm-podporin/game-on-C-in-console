@@ -52,4 +52,8 @@ Mkfile.old
 dkms.conf
 
 # VC
+*.vcidx
 *.VC.opendb
+*.VC.db
+*.VC.db-shm
+*.VC.db-wal

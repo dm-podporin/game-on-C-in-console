@@ -2,7 +2,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <conio.h>
-#include <stdlib.h>
+#include <time.h>
+#include <math.h>
+
 
 int main()
 
@@ -12,8 +14,10 @@ int main()
 	int i;
 	int cat_x = 10, cat_y = 5;
 	int mouse_x = 7, mouse_y = 7;
-
+	int mouseMovement;
 	char key;
+
+	srand(time(0));
 
 	do
 
@@ -35,10 +39,12 @@ int main()
 		for (i = 0; i < 20; i++)
 			printf("%s\n", map[i]);
 
+		//cat movement
+
 		int cat_track_x = cat_x;
 		int cat_track_y = cat_y;
 
-		if (key == 'w') cat_y-- & mouse_y--;
+		if (key == 'w') cat_y--;
 		if (key == 's') cat_y++;
 		if (key == 'a') cat_x--;
 		if (key == 'd') cat_x++;
@@ -49,9 +55,28 @@ int main()
 			cat_x = cat_track_x;
 		}
 
+		//mouse movement
+
+
+		mouseMovement = (rand() % 20);
+
+		if (mouseMovement < 6) mouse_y --;
+		if (mouseMovement < 11 & 5 < mouseMovement) mouse_y ++;
+		if (mouseMovement < 16 & 10 < mouseMovement) mouse_x --;
+		if (15 < mouseMovement) mouse_x ++;
+
+
+		printf("mouse movement and location");
+
+		{
+			printf("%i,% i,%i ", mouseMovement, mouse_y, mouse_x);
+		}
+
+		printf("\n");
 	}
 
 	while (key != 'e');
+
 
 	return 0;
 

@@ -53,7 +53,7 @@ int main()
 		{ 
 			cat_y = cat_track_y;
 			cat_x = cat_track_x;
-		}
+		};
 
 		//mouse movement
 

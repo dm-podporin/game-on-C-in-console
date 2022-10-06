@@ -16,6 +16,7 @@ int main()
 	int mouse_x = 7, mouse_y = 7;
 	int mouseMovement;
 	char key;
+	int score = 0;
 
 	srand(time(0));
 
@@ -50,33 +51,39 @@ int main()
 		if (key == 'd') cat_x++;
 
 		if (map[cat_y][cat_x] == '|' || map[cat_y][cat_x] == '-')
-		{ 
+		{
 			cat_y = cat_track_y;
 			cat_x = cat_track_x;
 		};
 
-		//mouse movement
 
-
-		mouseMovement = (rand() % 20);
-
-		if (mouseMovement < 6) mouse_y --;
-		if (mouseMovement < 11 & 5 < mouseMovement) mouse_y ++;
-		if (mouseMovement < 16 & 10 < mouseMovement) mouse_x --;
-		if (15 < mouseMovement) mouse_x ++;
-
-
-		printf("mouse movement and location");
-
+		if (cat_y == mouse_y && cat_x == mouse_x)
 		{
-			printf("%i,% i,%i ", mouseMovement, mouse_y, mouse_x);
+			mouse_x = rand() % 37 + 1;
+			mouse_y = rand() % 17 + 1;
+			score++;
 		}
 
-		printf("\n");
+		printf("Mouse caught %i \n", score);
+
+		//mouse movement
+
+		do
+
+		{
+			mouseMovement = (rand() % 20);
+
+			if (mouseMovement < 6 && mouse_y > 1) mouse_y--;
+			if (mouseMovement < 11 && 5 < mouseMovement && mouse_y < 18) mouse_y++;
+			if (mouseMovement < 16 && 10 < mouseMovement && mouse_x > 1) mouse_x--;
+			if (15 < mouseMovement && mouse_x < 38) mouse_x++;
+		} while (mouse_y < 1 || mouse_y > 19 || mouse_x < 1 || mouse_x > 39);
+
+		printf("mouse movement and location %i,% i,%i \n", mouseMovement, mouse_y, mouse_x);
+
 	}
 
 	while (key != 'e');
-
 
 	return 0;
 

@@ -1,29 +1,74 @@
-#define _CRT_SECURE_NO_WARNINGS
+﻿#define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <stdlib.h>
 #include <conio.h>
 #include <time.h>
 #include <math.h>
+#include <string.h>
+#include <windows.h>
 
+#define mapWidth 20
+#define mapHeight 10
+
+
+char map[mapHeight][mapWidth + 1];
+
+void hidecursor()
+{
+	HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+	CONSOLE_CURSOR_INFO info;
+	info.dwSize = 100;
+	info.bVisible = FALSE;
+	SetConsoleCursorInfo(consoleHandle, &info);
+}
+
+// put cursor to the begining of the concole (to use instead of syst(cls) to remove 
+void setcur(int x, int y)
+{
+	COORD coord;
+	coord.X = x;
+	coord.Y = y;
+	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
+}
+
+void mapCreation()
+{
+	for (int i = 0; i < mapWidth; i++)
+		map[0][i] = '-';
+	map[0][mapWidth] = '\0';
+
+	for (int i = 1; i < mapWidth - 1; i++)
+		map[1][i] = ' ';
+	map[1][0] = '|';
+	map[1][mapWidth - 1] = '|';
+	map[1][mapWidth] = '\0';
+
+	for (int i = 1; i < mapHeight - 1; i++)
+		strncpy(map[i], map[1],mapWidth + 1);
+
+	strncpy(map[mapHeight - 1], map[0], mapWidth + 1);
+}
+
+void showMap()
+{
+		for (int i = 0; i < mapHeight; i++)
+		printf("%s\n", map[i]);
+}
 
 int main()
 
 {
 	srand(time(0));
-
-	enum { map_rows = 10, map_columns = 10 };
-
-	char map[map_rows][map_columns];
 	int i;
 
 	// define map borders (game area = all area incide borders)
 
 	int topMB = 0;
-	int bottomMB = map_rows - 1;
+	int bottomMB = mapHeight - 1;
 	int leftMB = 0;
-	int rightMB = map_columns - 1;
+	int rightMB = mapWidth - 1;
 
-	//inotialise cat and mouse
+	//initialise cat and mouse
 
 	int cat_x = (rand() % (rightMB - 2) + 1), cat_y = rand() % (bottomMB - 2) + 1;
 	int mouse_x = (rand() % (rightMB - 2) + 1), mouse_y = rand() % (bottomMB - 2) + 1;
@@ -38,12 +83,7 @@ int main()
 	{
 		// empty map creation
 
-		sprintf(map[topMB], "---------");
-
-		for (i = topMB+1; i < bottomMB; i++)
-			sprintf(map[i], "|       |");
-
-		sprintf(map[bottomMB], "---------");
+		mapCreation();
 
 		key = _getch();
 
@@ -65,7 +105,7 @@ int main()
 			cat_x = cat_track_x;
 		};
 
-		//mouse catch tracking
+		//mouse catch tracking and respawn
 
 		if (cat_y == mouse_y && cat_x == mouse_x)
 		{
@@ -89,20 +129,21 @@ int main()
 			if (mouseMovement == 2 && mouse_x > 1 && !((mouse_x - 1 == cat_x) && mouse_y == cat_y)) mouse_x--;
 			if (mouseMovement == 3 && (mouse_x < (rightMB -2)) && !((mouse_x + 1 == cat_x) && mouse_y == cat_y)) mouse_x++;
 
-		} while (mouse_y < 1 || mouse_y > bottomMB || mouse_x < 1 || mouse_x > rightMB || (mouse_x == mouse_track_x && mouse_y == mouse_track_y) || (cat_y == mouse_y && cat_x == mouse_x));
+		} while (mouse_y < 1 || 
+			mouse_y > bottomMB || mouse_x < 1 || mouse_x > rightMB || (mouse_x == mouse_track_x && mouse_y == mouse_track_y) || (cat_y == mouse_y && cat_x == mouse_x));
 
 		map[cat_y][cat_x] = 'Q';
 		map[mouse_y][mouse_x] = '*';
 
 		//printing
 
-		system("cls");
-		for (i = 0; i < 20; i++)
-			printf("%s\n", map[i]);
+		setcur(0, 0);
+		hidecursor();
+		showMap();
 		printf("Mouse caught %i \n", score);
 		printf("Mouse movement and location %i,% i,%i \n", mouseMovement, mouse_y, mouse_x);
 		printf("Cat movement and location % i,%i \n", cat_y, cat_x);
-
+		Sleep(35);
 	}
 
 	while (key != 'e');

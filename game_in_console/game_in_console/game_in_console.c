@@ -27,18 +27,24 @@ typedef struct SPersonage {
 } TPersonage;
 
 TPersonage cat;
+TPersonage mouse[1];
 
 void InitPersonageT(TPersonage* pers, int yPos, int xPos, int pH, int pW)
 {
 	(*pers).locY = yPos;
-	(*pers).locY = xPos;
+	(*pers).locX = xPos;
 	(*pers).pHeigh = pH;
 	(*pers).pWidgh = pW;
 	(*pers).leftLimit = leftMB;
 	(*pers).rightLimit = mapHeight - pW;
 	(*pers).upperLimit = bottomMB;
 	(*pers).botomLimit = mapWidth - pH;
-	//(*pers).botomLimit = bottomMB - pH;
+}
+
+BOOL IsCollisionPers (TPersonage pers1, TPersonage pers2)
+{ 
+	return ((pers1.locX + pers1.pWidgh) > pers2.locX) && (pers1.locX < (pers2.locX + pers2.pWidgh)) &&
+		((pers1.locY + pers1.pHeigh) > pers2.locY) && (pers1.locY < (pers2.locY + pers2.pHeigh));
 }
 
 ///Cursor handling
@@ -107,9 +113,12 @@ int main()
 	sprintf(catIcon[1], "|o.o|");
 	sprintf(catIcon[2], "|_`_|");
 
-	//initialise mouse
+	//initialise mouse[0]
 
-	int mouse_x = (rand() % (rightMB - 2) + 1), mouse_y = rand() % (bottomMB - 2) + 1;
+	InitPersonageT(&mouse[0], 1, 1, 1, 1);
+
+	mouse[0].locX = rand() % (rightMB - 2) + 1;
+	mouse[0].locY = rand() % (bottomMB - 2) + 1;
 
 	do
 
@@ -144,34 +153,38 @@ int main()
 			for (char j = cat.locX, b = 0; i <= cat.locX + cat.pWidgh, b < cat.pWidgh; j++, b++)
 				map[i][j] = catIcon[a][b];
 
-		//mouse catch tracking and respawn
+		//mouse[0] catch tracking and respawn
 
-		if (cat.locY == mouse_y && cat.locX == mouse_x)
+		if (IsCollisionPers(cat, mouse[0]))
 		{
-			mouse_x = rand() % (rightMB-2) + 1;
-			mouse_y = rand() % (bottomMB-2) + 1;
+			mouse[0].locX = rand() % (rightMB-2) + 1;
+			mouse[0].locY = rand() % (bottomMB-2) + 1;
 			score++;
 		}
 
-		//mouse movement
+		//mouse[0] movement
 
-		int mouse_track_x = mouse_x;
-		int mouse_track_y = mouse_y;
+		int mouse_track_x = mouse[0].locX;
+		int mouse_track_y = mouse[0].locY;
 
 		do
 
 		{
 			mouseMovement = (rand() % 4);
 
-			if (mouseMovement == 0 && mouse_y > 1 && !((mouse_y -1 == cat.locY) && mouse_x == cat.locX)) mouse_y--;
-			if (mouseMovement == 1 && (mouse_y < (bottomMB-1)) && !((mouse_y + 1 == cat.locY) && mouse_x == cat.locX)) mouse_y++;
-			if (mouseMovement == 2 && mouse_x > 1 && !((mouse_x - 1 == cat.locX) && mouse_y == cat.locY)) mouse_x--;
-			if (mouseMovement == 3 && (mouse_x < (rightMB -2)) && !((mouse_x + 1 == cat.locX) && mouse_y == cat.locY)) mouse_x++;
+			if (mouseMovement == 0) mouse[0].locY--;
+				if (IsCollisionPers(cat, mouse[0])) mouse[0].locY++;
+			if (mouseMovement == 1) mouse[0].locY++;
+				if (IsCollisionPers(cat, mouse[0])) mouse[0].locY--;
+			if (mouseMovement == 2) mouse[0].locX--;
+				if (IsCollisionPers(cat, mouse[0])) mouse[0].locX++;
+			if (mouseMovement == 3) mouse[0].locX++;
+				if (IsCollisionPers(cat, mouse[0])) mouse[0].locX--;
 
-		} while (mouse_y < 1 || 
-			mouse_y > bottomMB || mouse_x < 1 || mouse_x > rightMB || (mouse_x == mouse_track_x && mouse_y == mouse_track_y) || (cat.locY == mouse_y && cat.locX == mouse_x));
+		} while (mouse[0].locY < 1 ||
+			mouse[0].locY > bottomMB || mouse[0].locX < 1 || mouse[0].locX > rightMB || (mouse[0].locX == mouse_track_x && mouse[0].locY == mouse_track_y) || (cat.locY == mouse[0].locY && cat.locX == mouse[0].locX));
 
-		map[mouse_y][mouse_x] = 'Q';
+		map[mouse[0].locY][mouse[0].locX] = 'Q';
 
 		//printing
 
@@ -179,7 +192,7 @@ int main()
 		hidecursor();
 		showMap();
 		printf("Mouse caught %i \n", score);
-		printf("Mouse movement and location %i,% i,%i \n", mouseMovement, mouse[1].locY, mouse[1].locX);
+		printf("Mouse movement and location %i,% i,%i \n", mouseMovement, mouse[0].locY, mouse[0].locX);
 		printf("Cat movement and location % i,%i \n", cat.locY, cat.locX);
 		Sleep(35);
 	}

@@ -179,7 +179,7 @@ int main()
 		hidecursor();
 		showMap();
 		printf("Mouse caught %i \n", score);
-		printf("Mouse movement and location %i,% i,%i \n", mouseMovement, mouse_y, mouse_x);
+		printf("Mouse movement and location %i,% i,%i \n", mouseMovement, mouse[1].locY, mouse[1].locX);
 		printf("Cat movement and location % i,%i \n", cat.locY, cat.locX);
 		Sleep(35);
 	}

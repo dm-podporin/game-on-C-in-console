@@ -7,11 +7,41 @@
 #include <string.h>
 #include <windows.h>
 
-#define mapWidth 20
-#define mapHeight 10
+#define mapWidth 60
+#define mapHeight 25
 
+// define map borders (game area = all area incide borders)
 
 char map[mapHeight][mapWidth + 1];
+int upperMB = 0;
+int bottomMB = mapHeight - 1;
+int leftMB = 0;
+int rightMB = mapWidth - 1;
+
+/// Personage related stuf
+
+typedef struct SPersonage {
+	int locY, locX;
+	int pHeigh, pWidgh;
+	int rightLimit, leftLimit, upperLimit, botomLimit;
+} TPersonage;
+
+TPersonage cat;
+
+void InitPersonageT(TPersonage* pers, int yPos, int xPos, int pH, int pW)
+{
+	(*pers).locY = yPos;
+	(*pers).locY = xPos;
+	(*pers).pHeigh = pH;
+	(*pers).pWidgh = pW;
+	(*pers).leftLimit = leftMB;
+	(*pers).rightLimit = mapHeight - pW;
+	(*pers).upperLimit = bottomMB;
+	(*pers).botomLimit = mapWidth - pH;
+	//(*pers).botomLimit = bottomMB - pH;
+}
+
+///Cursor handling
 
 void hidecursor()
 {
@@ -30,6 +60,8 @@ void setcur(int x, int y)
 	coord.Y = y;
 	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
+
+/// Map related stuf
 
 void mapCreation()
 {
@@ -60,23 +92,24 @@ int main()
 {
 	srand(time(0));
 	int i;
-
-	// define map borders (game area = all area incide borders)
-
-	int topMB = 0;
-	int bottomMB = mapHeight - 1;
-	int leftMB = 0;
-	int rightMB = mapWidth - 1;
-
-	//initialise cat and mouse
-
-	int cat_x = (rand() % (rightMB - 2) + 1), cat_y = rand() % (bottomMB - 2) + 1;
-	int mouse_x = (rand() % (rightMB - 2) + 1), mouse_y = rand() % (bottomMB - 2) + 1;
-
 	int mouseMovement;
 	char key;
 	int score = 0;
 
+
+	//initialise cat
+
+	InitPersonageT(&cat, 5, 5, 3, 5);
+
+	char catIcon[3][5];
+
+	sprintf(catIcon[0], "/|_/|");
+	sprintf(catIcon[1], "|o.o|");
+	sprintf(catIcon[2], "|_`_|");
+
+	//initialise mouse
+
+	int mouse_x = (rand() % (rightMB - 2) + 1), mouse_y = rand() % (bottomMB - 2) + 1;
 
 	do
 
@@ -87,27 +120,33 @@ int main()
 
 		key = _getch();
 
-		//cat movement
+		//cat
 
-		int cat_track_x = cat_x;
-		int cat_track_y = cat_y;
+		int cat_track_x = cat.locX;
+		int cat_track_y = cat.locY;
 
-		if (key == 'w') cat_y--;
-		if (key == 's') cat_y++;
-		if (key == 'a') cat_x--;
-		if (key == 'd') cat_x++;
+		if (key == 'w') cat.locY--;
+		if (key == 's') cat.locY++;
+		if (key == 'a') cat.locX--;
+		if (key == 'd') cat.locX++;
 
 		// border tracking for cat
 
-		if (map[cat_y][cat_x] == '|' || map[cat_y][cat_x] == '-')
+		if (map[cat.locY][cat.locX] == '|' || map[cat.locY][cat.locX] == '-')
 		{
-			cat_y = cat_track_y;
-			cat_x = cat_track_x;
+			cat.locY = cat_track_y;
+			cat.locX = cat_track_x;
 		};
+
+		//put cat on map
+
+		for (char i = cat.locY, a = 0; i <= cat.locY + cat.pHeigh, a < cat.pHeigh; i++, a++)
+			for (char j = cat.locX, b = 0; i <= cat.locX + cat.pWidgh, b < cat.pWidgh; j++, b++)
+				map[i][j] = catIcon[a][b];
 
 		//mouse catch tracking and respawn
 
-		if (cat_y == mouse_y && cat_x == mouse_x)
+		if (cat.locY == mouse_y && cat.locX == mouse_x)
 		{
 			mouse_x = rand() % (rightMB-2) + 1;
 			mouse_y = rand() % (bottomMB-2) + 1;
@@ -124,16 +163,15 @@ int main()
 		{
 			mouseMovement = (rand() % 4);
 
-			if (mouseMovement == 0 && mouse_y > 1 && !((mouse_y -1 == cat_y) && mouse_x == cat_x)) mouse_y--;
-			if (mouseMovement == 1 && (mouse_y < (bottomMB-1)) && !((mouse_y + 1 == cat_y) && mouse_x == cat_x)) mouse_y++;
-			if (mouseMovement == 2 && mouse_x > 1 && !((mouse_x - 1 == cat_x) && mouse_y == cat_y)) mouse_x--;
-			if (mouseMovement == 3 && (mouse_x < (rightMB -2)) && !((mouse_x + 1 == cat_x) && mouse_y == cat_y)) mouse_x++;
+			if (mouseMovement == 0 && mouse_y > 1 && !((mouse_y -1 == cat.locY) && mouse_x == cat.locX)) mouse_y--;
+			if (mouseMovement == 1 && (mouse_y < (bottomMB-1)) && !((mouse_y + 1 == cat.locY) && mouse_x == cat.locX)) mouse_y++;
+			if (mouseMovement == 2 && mouse_x > 1 && !((mouse_x - 1 == cat.locX) && mouse_y == cat.locY)) mouse_x--;
+			if (mouseMovement == 3 && (mouse_x < (rightMB -2)) && !((mouse_x + 1 == cat.locX) && mouse_y == cat.locY)) mouse_x++;
 
 		} while (mouse_y < 1 || 
-			mouse_y > bottomMB || mouse_x < 1 || mouse_x > rightMB || (mouse_x == mouse_track_x && mouse_y == mouse_track_y) || (cat_y == mouse_y && cat_x == mouse_x));
+			mouse_y > bottomMB || mouse_x < 1 || mouse_x > rightMB || (mouse_x == mouse_track_x && mouse_y == mouse_track_y) || (cat.locY == mouse_y && cat.locX == mouse_x));
 
-		map[cat_y][cat_x] = 'Q';
-		map[mouse_y][mouse_x] = '*';
+		map[mouse_y][mouse_x] = 'Q';
 
 		//printing
 
@@ -142,7 +180,7 @@ int main()
 		showMap();
 		printf("Mouse caught %i \n", score);
 		printf("Mouse movement and location %i,% i,%i \n", mouseMovement, mouse_y, mouse_x);
-		printf("Cat movement and location % i,%i \n", cat_y, cat_x);
+		printf("Cat movement and location % i,%i \n", cat.locY, cat.locX);
 		Sleep(35);
 	}
 

@@ -200,21 +200,13 @@ int main()
 			mouseMovement = (rand() % 4);
 
 			if (mouseMovement == 0) mouse[0].locY--;
-			if (IsCollisionObj(mouseHole[0], mouse[0])) holeCollis++, mouse[0].locX = mouseHole[1].locX, mouse[0].locY = mouseHole[1].locY+1;
-			if (IsCollisionObj(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locY++;
-
 			if (mouseMovement == 1) mouse[0].locY++;
-			if (IsCollisionObj(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locY--;
-			if (IsCollisionObj(mouseHole[0], mouse[0])) holeCollis++, mouse[0].locX = mouseHole[1].locX, mouse[0].locY = mouseHole[1].locY+1;
-
 			if (mouseMovement == 2) mouse[0].locX--;
-			if (IsCollisionObj(mouseHole[0], mouse[0])) holeCollis++, mouse[0].locX = mouseHole[1].locX, mouse[0].locY = mouseHole[1].locY+1;
-			if (IsCollisionObj(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locX++;
-
 			if (mouseMovement == 3) mouse[0].locX++;
+			
 			if (IsCollisionObj(mouseHole[0], mouse[0])) holeCollis++, mouse[0].locX = mouseHole[1].locX, mouse[0].locY = mouseHole[1].locY+1;
-			if (IsCollisionObj(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locX--;
-
+			if (IsCollisionObj(mouseHole[1], mouse[0])) holeCollis++, mouse[0].locX = mouseHole[0].locX + 1, mouse[0].locY = mouseHole[0].locY;
+			if (IsCollisionObj(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locX = mouse_track_x, mouse[0].locY = mouse_track_y;
 
 		} while (mouse[0].locX == mouse_track_x && mouse[0].locY == mouse_track_y);
 

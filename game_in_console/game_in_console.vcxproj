@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
-    <ProjectGuid>{54f05c83-3f13-4ba9-815b-48dca6647e1c}</ProjectGuid>
+    <ProjectGuid>{6b69b199-25a4-4735-8308-8f32de37c774}</ProjectGuid>
     <RootNamespace>gameinconsole</RootNamespace>
     <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
@@ -127,7 +127,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="game_in_console.c" />
+    <ClCompile Include="game_in_console.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

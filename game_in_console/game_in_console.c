@@ -18,46 +18,46 @@ int bottomMB = mapHeight - 1;
 int leftMB = 0;
 int rightMB = mapWidth - 1;
 
-/// Personage related stuf
+/// Object related stuf
 
-typedef struct SPersonage {
+typedef struct SObject {
 	int locY, locX;
 	int pHeigh, pWidgh;
 	int rightLimit, leftLimit, upperLimit, botomLimit;
-} TPersonage;
+} TObject;
 
-TPersonage cat;
-TPersonage mouse[1];
+TObject cat;
+TObject mouse[1];
 
-void InitPersonageT(TPersonage* pers, int yPos, int xPos, int pH, int pW)
+void InitObjectT(TObject* obj, int yPos, int xPos, int pH, int pW)
 {
-	(*pers).locY = yPos;
-	(*pers).locX = xPos;
-	(*pers).pHeigh = pH;
-	(*pers).pWidgh = pW;
-	(*pers).leftLimit = leftMB;
-	(*pers).rightLimit = mapWidth - pW;
-	(*pers).upperLimit = upperMB;
-	(*pers).botomLimit = mapHeight - pH;
+	(*obj).locY = yPos;
+	(*obj).locX = xPos;
+	(*obj).pHeigh = pH;
+	(*obj).pWidgh = pW;
+	(*obj).leftLimit = leftMB;
+	(*obj).rightLimit = mapWidth - pW;
+	(*obj).upperLimit = upperMB;
+	(*obj).botomLimit = mapHeight - pH;
 }
 
-//void ShowPers (TPersonage pers)
+//void ShowObj (TObject obj)
 //{
 //	for (char i = cat.locY, a = 0; i <= cat.locY + cat.pHeigh, a < cat.pHeigh; i++, a++)
 //		for (char j = cat.locX, b = 0; i <= cat.locX + cat.pWidgh, b < cat.pWidgh; j++, b++)
 //			map[i][j] = catIcon[a][b];
 //}
 
-BOOL IsCollisionPers(TPersonage pers1, TPersonage pers2)
+BOOL IsCollisionObj(TObject obj1, TObject obj2)
 {
-	return ((pers1.locX + pers1.pWidgh) > pers2.locX) && (pers1.locX < (pers2.locX + pers2.pWidgh)) &&
-		((pers1.locY + pers1.pHeigh) > pers2.locY) && (pers1.locY < (pers2.locY + pers2.pHeigh));
+	return ((obj1.locX + obj1.pWidgh) > obj2.locX) && (obj1.locX < (obj2.locX + obj2.pWidgh)) &&
+		((obj1.locY + obj1.pHeigh) > obj2.locY) && (obj1.locY < (obj2.locY + obj2.pHeigh));
 }
 
-BOOL IsBorderCollision(TPersonage pers)
+BOOL IsBorderCollision(TObject obj)
 {
-	return pers.locX == pers.leftLimit || pers.locX == pers.rightLimit ||
-		pers.locY == pers.upperLimit || pers.locY == pers.botomLimit;
+	return obj.locX == obj.leftLimit || obj.locX == obj.rightLimit ||
+		obj.locY == obj.upperLimit || obj.locY == obj.botomLimit;
 }
 
 ///Cursor handling
@@ -118,7 +118,7 @@ int main()
 
 	//initialise cat
 
-	InitPersonageT(&cat, 1, 1, 3, 5);
+	InitObjectT(&cat, 1, 1, 3, 5);
 
 	char catIcon[3][5];
 
@@ -128,7 +128,7 @@ int main()
 
 	//initialise mouse[0]
 
-	InitPersonageT(&mouse[0], 1, 1, 1, 1);
+	InitObjectT(&mouse[0], 1, 1, 1, 1);
 
 	mouse[0].locX = rand() % (rightMB - 2) + 1;
 	mouse[0].locY = rand() % (bottomMB - 2) + 1;
@@ -168,13 +168,13 @@ int main()
 
 		//mouse[0] catch tracking and respawn
 
-		if (IsCollisionPers(cat, mouse[0]))
+		if (IsCollisionObj(cat, mouse[0]))
 		{
 			do
 			{
 				mouse[0].locX = rand() % (rightMB - 2) + 1;
 				mouse[0].locY = rand() % (bottomMB - 2) + 1;
-			} while (IsCollisionPers(cat, mouse[0]));
+			} while (IsCollisionObj(cat, mouse[0]));
 			score++;
 		}
 
@@ -189,13 +189,13 @@ int main()
 			mouseMovement = (rand() % 4);
 
 			if (mouseMovement == 0) mouse[0].locY--;
-			if (IsCollisionPers(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locY++;
+			if (IsCollisionObj(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locY++;
 			if (mouseMovement == 1) mouse[0].locY++;
-			if (IsCollisionPers(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locY--;
+			if (IsCollisionObj(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locY--;
 			if (mouseMovement == 2) mouse[0].locX--;
-			if (IsCollisionPers(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locX++;
+			if (IsCollisionObj(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locX++;
 			if (mouseMovement == 3) mouse[0].locX++;
-			if (IsCollisionPers(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locX--;
+			if (IsCollisionObj(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locX--;
 
 		} while (mouse[0].locX == mouse_track_x && mouse[0].locY == mouse_track_y);
 

@@ -7,8 +7,8 @@
 #include <string.h>
 #include <windows.h>
 
-#define mapWidth 8
-#define mapHeight 7
+#define mapWidth 9
+#define mapHeight 10
 
 // define map borders (game area = all area incide borders)
 
@@ -28,6 +28,7 @@ typedef struct SObject {
 
 TObject cat;
 TObject mouse[1];
+TObject mouseHole[2];
 
 void InitObjectT(TObject* obj, int yPos, int xPos, int pH, int pW)
 {
@@ -115,6 +116,16 @@ int main()
 	char key;
 	int score = 0;
 
+	// mouse holes creation
+
+	InitObjectT(&mouseHole[0], 1, 1, 1, 1);
+	InitObjectT(&mouseHole[1], 1, 1, 1, 1);
+
+	mouseHole[0].locX = 0;
+	mouseHole[0].locY = 7;
+
+	mouseHole[1].locX = 7;
+	mouseHole[1].locY = 0;
 
 	//initialise cat
 
@@ -133,6 +144,8 @@ int main()
 	mouse[0].locX = rand() % (rightMB - 2) + 1;
 	mouse[0].locY = rand() % (bottomMB - 2) + 1;
 
+	int holeCollis = 0;
+
 	do
 
 	{
@@ -140,17 +153,15 @@ int main()
 
 		mapCreation();
 
-		key = _getch();
-
 		//cat
 
 		int cat_track_x = cat.locX;
 		int cat_track_y = cat.locY;
 
-		if (key == 'w') cat.locY--;
-		if (key == 's') cat.locY++;
-		if (key == 'a') cat.locX--;
-		if (key == 'd') cat.locX++;
+		if (GetKeyState('W') < 0) cat.locY--;
+		if (GetKeyState('S') < 0) cat.locY++;
+		if (GetKeyState('A') < 0) cat.locX--;
+		if (GetKeyState('D') < 0) cat.locX++;
 
 		// border tracking for cat
 
@@ -162,8 +173,8 @@ int main()
 
 		//put cat on map
 
-		for (char i = cat.locY, a = 0; i <= cat.locY + cat.pHeigh, a < cat.pHeigh; i++, a++)
-			for (char j = cat.locX, b = 0; i <= cat.locX + cat.pWidgh, b < cat.pWidgh; j++, b++)
+		for (char i = cat.locY, a = 0; i <= (cat.locY + cat.pHeigh), a < cat.pHeigh; i++, a++)
+			for (char j = cat.locX, b = 0; i <= (cat.locX + cat.pWidgh), b < cat.pWidgh; j++, b++)
 				map[i][j] = catIcon[a][b];
 
 		//mouse[0] catch tracking and respawn
@@ -189,30 +200,41 @@ int main()
 			mouseMovement = (rand() % 4);
 
 			if (mouseMovement == 0) mouse[0].locY--;
+			if (IsCollisionObj(mouseHole[0], mouse[0])) holeCollis++, mouse[0].locX = mouseHole[1].locX, mouse[0].locY = mouseHole[1].locY+1;
 			if (IsCollisionObj(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locY++;
+
 			if (mouseMovement == 1) mouse[0].locY++;
 			if (IsCollisionObj(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locY--;
+			if (IsCollisionObj(mouseHole[0], mouse[0])) holeCollis++, mouse[0].locX = mouseHole[1].locX, mouse[0].locY = mouseHole[1].locY+1;
+
 			if (mouseMovement == 2) mouse[0].locX--;
+			if (IsCollisionObj(mouseHole[0], mouse[0])) holeCollis++, mouse[0].locX = mouseHole[1].locX, mouse[0].locY = mouseHole[1].locY+1;
 			if (IsCollisionObj(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locX++;
+
 			if (mouseMovement == 3) mouse[0].locX++;
+			if (IsCollisionObj(mouseHole[0], mouse[0])) holeCollis++, mouse[0].locX = mouseHole[1].locX, mouse[0].locY = mouseHole[1].locY+1;
 			if (IsCollisionObj(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locX--;
+
 
 		} while (mouse[0].locX == mouse_track_x && mouse[0].locY == mouse_track_y);
 
 		map[mouse[0].locY][mouse[0].locX] = 'Q';
+		map[mouseHole[0].locY][mouseHole[0].locX] = '0';
+		map[mouseHole[1].locY][mouseHole[1].locX] = '0';
 
 		//printing
 
 		setcur(0, 0);
 		hidecursor();
 		showMap();
+		printf("Hole collisions %i \n", holeCollis);
 		printf("Mouse caught %i \n", score);
 		printf("Mouse movement and location %i,% i,%i \n", mouseMovement, mouse[0].locY, mouse[0].locX);
-		printf("Cat movement and location % i,%i \n", cat.locY, cat.locX);
-		Sleep(35);
+		printf("Cat movement and location %i,%i \n", cat.locY, cat.locX);
+		Sleep(50);
 	}
 
-	while (key != 'e');
+	while (GetKeyState(VK_ESCAPE) >= 0);
 
 	return 0;
 

@@ -7,13 +7,8 @@
 #include <string.h>
 #include <windows.h>
 
-<<<<<<< HEAD
 #define mapWidth 8
 #define mapHeight 7
-=======
-#define mapWidth 60
-#define mapHeight 25
->>>>>>> dev
 
 // define map borders (game area = all area incide borders)
 
@@ -41,7 +36,6 @@ void InitPersonageT(TPersonage* pers, int yPos, int xPos, int pH, int pW)
 	(*pers).pHeigh = pH;
 	(*pers).pWidgh = pW;
 	(*pers).leftLimit = leftMB;
-<<<<<<< HEAD
 	(*pers).rightLimit = mapWidth - pW;
 	(*pers).upperLimit = upperMB;
 	(*pers).botomLimit = mapHeight - pH;
@@ -56,28 +50,16 @@ void InitPersonageT(TPersonage* pers, int yPos, int xPos, int pH, int pW)
 
 BOOL IsCollisionPers(TPersonage pers1, TPersonage pers2)
 {
-=======
-	(*pers).rightLimit = mapHeight - pW;
-	(*pers).upperLimit = bottomMB;
-	(*pers).botomLimit = mapWidth - pH;
-}
-
-BOOL IsCollisionPers (TPersonage pers1, TPersonage pers2)
-{ 
->>>>>>> dev
 	return ((pers1.locX + pers1.pWidgh) > pers2.locX) && (pers1.locX < (pers2.locX + pers2.pWidgh)) &&
 		((pers1.locY + pers1.pHeigh) > pers2.locY) && (pers1.locY < (pers2.locY + pers2.pHeigh));
 }
 
-<<<<<<< HEAD
 BOOL IsBorderCollision(TPersonage pers)
 {
 	return pers.locX == pers.leftLimit || pers.locX == pers.rightLimit ||
 		pers.locY == pers.upperLimit || pers.locY == pers.botomLimit;
 }
 
-=======
->>>>>>> dev
 ///Cursor handling
 
 void hidecursor()
@@ -113,14 +95,14 @@ void mapCreation()
 	map[1][mapWidth] = '\0';
 
 	for (int i = 1; i < mapHeight - 1; i++)
-		strncpy(map[i], map[1],mapWidth + 1);
+		strncpy(map[i], map[1], mapWidth + 1);
 
 	strncpy(map[mapHeight - 1], map[0], mapWidth + 1);
 }
 
 void showMap()
 {
-		for (int i = 0; i < mapHeight; i++)
+	for (int i = 0; i < mapHeight; i++)
 		printf("%s\n", map[i]);
 }
 
@@ -136,13 +118,8 @@ int main()
 
 	//initialise cat
 
-<<<<<<< HEAD
 	InitPersonageT(&cat, 1, 1, 3, 5);
-	
-=======
-	InitPersonageT(&cat, 5, 5, 3, 5);
 
->>>>>>> dev
 	char catIcon[3][5];
 
 	sprintf(catIcon[0], "/|_/|");
@@ -177,11 +154,7 @@ int main()
 
 		// border tracking for cat
 
-<<<<<<< HEAD
 		if (IsBorderCollision(cat))
-=======
-		if (map[cat.locY][cat.locX] == '|' || map[cat.locY][cat.locX] == '-')
->>>>>>> dev
 		{
 			cat.locY = cat_track_y;
 			cat.locX = cat_track_x;
@@ -197,16 +170,11 @@ int main()
 
 		if (IsCollisionPers(cat, mouse[0]))
 		{
-<<<<<<< HEAD
 			do
 			{
 				mouse[0].locX = rand() % (rightMB - 2) + 1;
 				mouse[0].locY = rand() % (bottomMB - 2) + 1;
 			} while (IsCollisionPers(cat, mouse[0]));
-=======
-			mouse[0].locX = rand() % (rightMB-2) + 1;
-			mouse[0].locY = rand() % (bottomMB-2) + 1;
->>>>>>> dev
 			score++;
 		}
 
@@ -221,28 +189,15 @@ int main()
 			mouseMovement = (rand() % 4);
 
 			if (mouseMovement == 0) mouse[0].locY--;
-<<<<<<< HEAD
-				if (IsCollisionPers(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locY++;
+			if (IsCollisionPers(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locY++;
 			if (mouseMovement == 1) mouse[0].locY++;
-				if (IsCollisionPers(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locY--;
+			if (IsCollisionPers(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locY--;
 			if (mouseMovement == 2) mouse[0].locX--;
-				if (IsCollisionPers(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locX++;
+			if (IsCollisionPers(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locX++;
 			if (mouseMovement == 3) mouse[0].locX++;
-				if (IsCollisionPers(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locX--;
+			if (IsCollisionPers(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locX--;
 
 		} while (mouse[0].locX == mouse_track_x && mouse[0].locY == mouse_track_y);
-=======
-				if (IsCollisionPers(cat, mouse[0])) mouse[0].locY++;
-			if (mouseMovement == 1) mouse[0].locY++;
-				if (IsCollisionPers(cat, mouse[0])) mouse[0].locY--;
-			if (mouseMovement == 2) mouse[0].locX--;
-				if (IsCollisionPers(cat, mouse[0])) mouse[0].locX++;
-			if (mouseMovement == 3) mouse[0].locX++;
-				if (IsCollisionPers(cat, mouse[0])) mouse[0].locX--;
-
-		} while (mouse[0].locY < 1 ||
-			mouse[0].locY > bottomMB || mouse[0].locX < 1 || mouse[0].locX > rightMB || (mouse[0].locX == mouse_track_x && mouse[0].locY == mouse_track_y) || (cat.locY == mouse[0].locY && cat.locX == mouse[0].locX));
->>>>>>> dev
 
 		map[mouse[0].locY][mouse[0].locX] = 'Q';
 

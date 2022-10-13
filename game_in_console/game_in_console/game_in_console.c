@@ -7,8 +7,8 @@
 #include <string.h>
 #include <windows.h>
 
-#define mapWidth 60
-#define mapHeight 25
+#define mapWidth 8
+#define mapHeight 7
 
 // define map borders (game area = all area incide borders)
 
@@ -36,15 +36,28 @@ void InitPersonageT(TPersonage* pers, int yPos, int xPos, int pH, int pW)
 	(*pers).pHeigh = pH;
 	(*pers).pWidgh = pW;
 	(*pers).leftLimit = leftMB;
-	(*pers).rightLimit = mapHeight - pW;
-	(*pers).upperLimit = bottomMB;
-	(*pers).botomLimit = mapWidth - pH;
+	(*pers).rightLimit = mapWidth - pW;
+	(*pers).upperLimit = upperMB;
+	(*pers).botomLimit = mapHeight - pH;
 }
 
-BOOL IsCollisionPers (TPersonage pers1, TPersonage pers2)
-{ 
+//void ShowPers (TPersonage pers)
+//{
+//	for (char i = cat.locY, a = 0; i <= cat.locY + cat.pHeigh, a < cat.pHeigh; i++, a++)
+//		for (char j = cat.locX, b = 0; i <= cat.locX + cat.pWidgh, b < cat.pWidgh; j++, b++)
+//			map[i][j] = catIcon[a][b];
+//}
+
+BOOL IsCollisionPers(TPersonage pers1, TPersonage pers2)
+{
 	return ((pers1.locX + pers1.pWidgh) > pers2.locX) && (pers1.locX < (pers2.locX + pers2.pWidgh)) &&
 		((pers1.locY + pers1.pHeigh) > pers2.locY) && (pers1.locY < (pers2.locY + pers2.pHeigh));
+}
+
+BOOL IsBorderCollision(TPersonage pers)
+{
+	return pers.locX == pers.leftLimit || pers.locX == pers.rightLimit ||
+		pers.locY == pers.upperLimit || pers.locY == pers.botomLimit;
 }
 
 ///Cursor handling
@@ -105,8 +118,8 @@ int main()
 
 	//initialise cat
 
-	InitPersonageT(&cat, 5, 5, 3, 5);
-
+	InitPersonageT(&cat, 1, 1, 3, 5);
+	
 	char catIcon[3][5];
 
 	sprintf(catIcon[0], "/|_/|");
@@ -141,7 +154,7 @@ int main()
 
 		// border tracking for cat
 
-		if (map[cat.locY][cat.locX] == '|' || map[cat.locY][cat.locX] == '-')
+		if (IsBorderCollision(cat))
 		{
 			cat.locY = cat_track_y;
 			cat.locX = cat_track_x;
@@ -157,8 +170,11 @@ int main()
 
 		if (IsCollisionPers(cat, mouse[0]))
 		{
-			mouse[0].locX = rand() % (rightMB-2) + 1;
-			mouse[0].locY = rand() % (bottomMB-2) + 1;
+			do
+			{
+				mouse[0].locX = rand() % (rightMB - 2) + 1;
+				mouse[0].locY = rand() % (bottomMB - 2) + 1;
+			} while (IsCollisionPers(cat, mouse[0]));
 			score++;
 		}
 
@@ -173,16 +189,15 @@ int main()
 			mouseMovement = (rand() % 4);
 
 			if (mouseMovement == 0) mouse[0].locY--;
-				if (IsCollisionPers(cat, mouse[0])) mouse[0].locY++;
+				if (IsCollisionPers(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locY++;
 			if (mouseMovement == 1) mouse[0].locY++;
-				if (IsCollisionPers(cat, mouse[0])) mouse[0].locY--;
+				if (IsCollisionPers(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locY--;
 			if (mouseMovement == 2) mouse[0].locX--;
-				if (IsCollisionPers(cat, mouse[0])) mouse[0].locX++;
+				if (IsCollisionPers(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locX++;
 			if (mouseMovement == 3) mouse[0].locX++;
-				if (IsCollisionPers(cat, mouse[0])) mouse[0].locX--;
+				if (IsCollisionPers(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locX--;
 
-		} while (mouse[0].locY < 1 ||
-			mouse[0].locY > bottomMB || mouse[0].locX < 1 || mouse[0].locX > rightMB || (mouse[0].locX == mouse_track_x && mouse[0].locY == mouse_track_y) || (cat.locY == mouse[0].locY && cat.locX == mouse[0].locX));
+		} while (mouse[0].locX == mouse_track_x && mouse[0].locY == mouse_track_y);
 
 		map[mouse[0].locY][mouse[0].locX] = 'Q';
 

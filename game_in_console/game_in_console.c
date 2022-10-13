@@ -7,8 +7,8 @@
 #include <string.h>
 #include <windows.h>
 
-#define mapWidth 9
-#define mapHeight 10
+#define mapWidth 50
+#define mapHeight 24
 
 // define map borders (game area = all area incide borders)
 
@@ -24,13 +24,15 @@ typedef struct SObject {
 	int locY, locX;
 	int pHeigh, pWidgh;
 	int rightLimit, leftLimit, upperLimit, botomLimit;
+	char icon[10][10];
 } TObject;
 
 TObject cat;
 TObject mouse[1];
-TObject mouseHole[2];
+TObject mouseHole[10];
+TObject mouseTrap[10];
 
-void InitObjectT(TObject* obj, int yPos, int xPos, int pH, int pW)
+void InitObject(TObject *obj, int yPos, int xPos, int pH, int pW)
 {
 	(*obj).locY = yPos;
 	(*obj).locX = xPos;
@@ -40,7 +42,18 @@ void InitObjectT(TObject* obj, int yPos, int xPos, int pH, int pW)
 	(*obj).rightLimit = mapWidth - pW;
 	(*obj).upperLimit = upperMB;
 	(*obj).botomLimit = mapHeight - pH;
+	(*obj).icon[10][10];
 }
+
+
+// put ibject on map
+
+void PutObject(TObject *obj)
+	{
+	for (char i = (*obj).locY, a = 0; i < ((*obj).locY + (*obj).pHeigh), a < (*obj).pHeigh; i++, a++)
+	for (char j = (*obj).locX, b = 0; i < ((*obj).locX + (*obj).pWidgh), b < (*obj).pWidgh; j++, b++)
+	map[i][j] = (*obj).icon[a][b];
+	}
 
 //void ShowObj (TObject obj)
 //{
@@ -118,33 +131,38 @@ int main()
 
 	// mouse holes creation
 
-	InitObjectT(&mouseHole[0], 1, 1, 1, 1);
-	InitObjectT(&mouseHole[1], 1, 1, 1, 1);
+	for (i = 0; i < 10; i++)
+	{
+		InitObject(&mouseHole[i], rand() % (bottomMB - 2) + 1, rand() % (rightMB - 2) + 1, 1, 1);
+		sprintf(mouseHole[i].icon[0], "0");
+	}
 
-	mouseHole[0].locX = 0;
-	mouseHole[0].locY = 7;
+	// trap creation
 
-	mouseHole[1].locX = 7;
-	mouseHole[1].locY = 0;
+	for (i = 0; i < 10; i++)
+	{
+		InitObject(&mouseTrap[i], rand() % (bottomMB - 2) + 1, rand() % (rightMB - 2) + 1, 1, 2);
+		sprintf(mouseTrap[i].icon[0], "_/");
+	}
 
 	//initialise cat
 
-	InitObjectT(&cat, 1, 1, 3, 5);
+	InitObject(&cat, 1, 1, 3, 5);
 
-	char catIcon[3][5];
-
-	sprintf(catIcon[0], "/|_/|");
-	sprintf(catIcon[1], "|o.o|");
-	sprintf(catIcon[2], "|_`_|");
+	sprintf(cat.icon[0], "/|_/|");
+	sprintf(cat.icon[1], "|o.o|");
+	sprintf(cat.icon[2], "|_`_|");
 
 	//initialise mouse[0]
 
-	InitObjectT(&mouse[0], 1, 1, 1, 1);
+	InitObject(&mouse[0], 1, 1, 1, 2);
+	sprintf(mouse[0].icon[0], "<~");
 
 	mouse[0].locX = rand() % (rightMB - 2) + 1;
 	mouse[0].locY = rand() % (bottomMB - 2) + 1;
 
-	int holeCollis = 0;
+	int holeCollis = 0; 
+	int trapCollis = 0;
 
 	do
 
@@ -152,6 +170,20 @@ int main()
 		// empty map creation
 
 		mapCreation();
+
+		//mouse holes putting on map
+
+		for (i = 0; i < 10; i++)
+		{
+			PutObject(&mouseHole[i]);
+		}
+
+		//mouse trap putting on map
+
+		for (i = 0; i < 10; i++)
+		{
+			PutObject(&mouseTrap[i]);
+		}
 
 		//cat
 
@@ -173,9 +205,7 @@ int main()
 
 		//put cat on map
 
-		for (char i = cat.locY, a = 0; i <= (cat.locY + cat.pHeigh), a < cat.pHeigh; i++, a++)
-			for (char j = cat.locX, b = 0; i <= (cat.locX + cat.pWidgh), b < cat.pWidgh; j++, b++)
-				map[i][j] = catIcon[a][b];
+		PutObject(&cat);
 
 		//mouse[0] catch tracking and respawn
 
@@ -204,23 +234,32 @@ int main()
 			if (mouseMovement == 2) mouse[0].locX--;
 			if (mouseMovement == 3) mouse[0].locX++;
 			
-			if (IsCollisionObj(mouseHole[0], mouse[0])) holeCollis++, mouse[0].locX = mouseHole[1].locX, mouse[0].locY = mouseHole[1].locY+1;
-			if (IsCollisionObj(mouseHole[1], mouse[0])) holeCollis++, mouse[0].locX = mouseHole[0].locX + 1, mouse[0].locY = mouseHole[0].locY;
+			for(i = 0; i < 10; i++)
+			{
+				if (IsCollisionObj(mouseHole[i], mouse[0])) holeCollis++, mouse[0].locX = mouseHole[rand() % 10].locX, mouse[0].locY = mouseHole[rand() % 10].locY + 1;
+			}	for(i = 0; i < 10; i++)
+			{
+				if (IsCollisionObj(mouseHole[i], mouse[0])) holeCollis++, mouse[0].locX = mouseHole[rand() % 10].locX, mouse[0].locY = mouseHole[rand() % 10].locY + 1;
+			}
 			if (IsCollisionObj(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locX = mouse_track_x, mouse[0].locY = mouse_track_y;
+
+			for (i = 0; i < 10; i++)
+			{
+				if (IsCollisionObj(mouseTrap[i], mouse[0])) trapCollis++, mouse[0].locX = rand() % (rightMB - 2) + 1, mouse[0].locY = rand() % (bottomMB - 2) + 1;
+			}
 
 		} while (mouse[0].locX == mouse_track_x && mouse[0].locY == mouse_track_y);
 
-		map[mouse[0].locY][mouse[0].locX] = 'Q';
-		map[mouseHole[0].locY][mouseHole[0].locX] = '0';
-		map[mouseHole[1].locY][mouseHole[1].locX] = '0';
+		PutObject(&mouse);
 
 		//printing
 
 		setcur(0, 0);
 		hidecursor();
+		printf("Mouse caught %i \n", score);
 		showMap();
 		printf("Hole collisions %i \n", holeCollis);
-		printf("Mouse caught %i \n", score);
+		printf("Hole collisions %i \n", trapCollis);
 		printf("Mouse movement and location %i,% i,%i \n", mouseMovement, mouse[0].locY, mouse[0].locX);
 		printf("Cat movement and location %i,%i \n", cat.locY, cat.locX);
 		Sleep(50);

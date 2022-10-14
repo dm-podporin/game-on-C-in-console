@@ -6,9 +6,14 @@
 #include <math.h>
 #include <string.h>
 #include <windows.h>
+#include "object.h"
+#include "cursorHandling.h"
 
-#define mapWidth 50
-#define mapHeight 24
+#define mapWidth 120
+#define mapHeight 55
+#define mouseNumber 10
+#define trapNumber 50
+#define mouseHNumber 35
 
 // define map borders (game area = all area incide borders)
 
@@ -20,18 +25,11 @@ int rightMB = mapWidth - 1;
 
 /// Object related stuf
 
-typedef struct SObject {
-	int locY, locX;
-	int pHeigh, pWidgh;
-	int rightLimit, leftLimit, upperLimit, botomLimit;
-	char icon[10][10];
-	int status;
-} TObject;
 
 TObject cat;
-TObject mouse[1];
-TObject mouseHole[10];
-TObject mouseTrap[10];
+TObject mouse[mouseNumber];
+TObject mouseHole[mouseHNumber];
+TObject mouseTrap[trapNumber];
 
 void InitObject(TObject *obj, int yPos, int xPos, int pH, int pW)
 {
@@ -45,8 +43,18 @@ void InitObject(TObject *obj, int yPos, int xPos, int pH, int pW)
 	(*obj).botomLimit = mapHeight - pH;
 	(*obj).icon[10][10];
 	(*obj).status = 0;
+	(*obj).trackY = 0;
+	(*obj).trackX = 0;
 }
 
+void RandomRespLoc(TObject *obj, TObject *col1, int colArea)
+{
+	do
+	{
+		(*obj).locX = rand() % (rightMB - 2) + 1;
+		(*obj).locY = rand() % (bottomMB - 2) + 1;
+	} while (IsCollisionObj(*obj, *col1, colArea));
+	}
 
 // put ibject on map
 
@@ -57,38 +65,6 @@ void PutObject(TObject *obj)
 	map[i][j] = (*obj).icon[a][b];
 	}
 
-
-BOOL IsCollisionObj(TObject obj1, TObject obj2)
-{
-	return ((obj1.locX + obj1.pWidgh) > obj2.locX) && (obj1.locX < (obj2.locX + obj2.pWidgh)) &&
-		((obj1.locY + obj1.pHeigh) > obj2.locY) && (obj1.locY < (obj2.locY + obj2.pHeigh));
-}
-
-BOOL IsBorderCollision(TObject obj)
-{
-	return obj.locX == obj.leftLimit || obj.locX == obj.rightLimit ||
-		obj.locY == obj.upperLimit || obj.locY == obj.botomLimit;
-}
-
-///Cursor handling
-
-void hidecursor()
-{
-	HANDLE consoleHandle = GetStdHandle(STD_OUTPUT_HANDLE);
-	CONSOLE_CURSOR_INFO info;
-	info.dwSize = 100;
-	info.bVisible = FALSE;
-	SetConsoleCursorInfo(consoleHandle, &info);
-}
-
-// put cursor to the begining of the concole (to use instead of syst(cls) to remove 
-void setcur(int x, int y)
-{
-	COORD coord;
-	coord.X = x;
-	coord.Y = y;
-	SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
-}
 
 /// Map related stuf
 
@@ -119,15 +95,22 @@ void showMap()
 int main()
 
 {
-	srand(time(0));
-	int i;
 	int mouseMovement;
 	char key;
 	int score = 0;
+	int holeCollis = 0;
+	int trapMouse = 0;
+	int trapCat = 0;
+	int catLive = 5;
+	int mouseUnMove = 0;
+	char randomHole;
+
+
+	srand(time(0));
 
 	// mouse holes creation
 
-	for (i = 0; i < 10; i++)
+	for (char i = 0; i < mouseHNumber; i++)
 	{
 		InitObject(&mouseHole[i], rand() % (bottomMB - 2) + 1, rand() % (rightMB - 2) + 1, 1, 1);
 		sprintf(mouseHole[i].icon[0], "0");
@@ -135,7 +118,7 @@ int main()
 
 	// trap creation
 
-	for (i = 0; i < 10; i++)
+	for (char i = 0; i < trapNumber; i++)
 	{
 		InitObject(&mouseTrap[i], rand() % (bottomMB - 2) + 1, rand() % (rightMB - 2) + 1, 1, 2);
 		sprintf(mouseTrap[i].icon[0], "_/");
@@ -151,16 +134,13 @@ int main()
 
 	//initialise mouse[0]
 
-	InitObject(&mouse[0], 1, 1, 1, 2);
-	sprintf(mouse[0].icon[0], "<~");
 
-	mouse[0].locX = rand() % (rightMB - 2) + 1;
-	mouse[0].locY = rand() % (bottomMB - 2) + 1;
+	for (char i = 0; i < mouseNumber; i++)
+	{
+		InitObject(&mouse[i], rand() % (bottomMB - 2) + 1, rand() % (rightMB - 2) + 1, 1, 2);
+		sprintf(mouse[i].icon[0], "<~");
+	}
 
-	int holeCollis = 0; 
-	int trapMouse = 0;
-	int trapCat = 0;
-	int catLive = 5;
 
 	do
 
@@ -171,22 +151,22 @@ int main()
 
 		//mouse holes putting on map
 
-		for (i = 0; i < 10; i++)
+		for (char i = 0; i < mouseHNumber; i++)
 		{
 			PutObject(&mouseHole[i]);
 		}
 
 		//mouse trap putting on map
 
-		for (i = 0; i < 10; i++)
+		for (char i = 0; i < trapNumber; i++)
 		{
 			PutObject(&mouseTrap[i]);
 		}
 
 		//cat
 
-		int cat_track_x = cat.locX;
-		int cat_track_y = cat.locY;
+		cat.trackX = cat.locX;
+		cat.trackY = cat.locY;
 
 		if (GetKeyState('W') < 0) cat.locY--;
 		if (GetKeyState('S') < 0) cat.locY++;
@@ -197,74 +177,93 @@ int main()
 
 		if (IsBorderCollision(cat))
 		{
-			cat.locY = cat_track_y;
-			cat.locX = cat_track_x;
+			cat.locY = cat.trackY;
+			cat.locX = cat.trackX;
 		};
 
-		//put cat on map
+		//mouses catch tracking and respawn
 
-		PutObject(&cat);
-
-		//mouse[0] catch tracking and respawn
-
-		if (IsCollisionObj(cat, mouse[0]))
+		for (char i = 0; i < mouseNumber; i++)
 		{
-			do
+			if (IsCollisionObj(cat, mouse[i], 0))
 			{
-				mouse[0].locX = rand() % (rightMB - 2) + 1;
-				mouse[0].locY = rand() % (bottomMB - 2) + 1;
-			} while (IsCollisionObj(cat, mouse[0]));
-			score++;
+				do
+				{
+					mouse[i].locX = rand() % (rightMB - 2) + 1;
+					mouse[i].locY = rand() % (bottomMB - 2) + 1;
+				} while (IsCollisionObj(cat, mouse[i], 1));
+				score++;
+			}
 		}
 
 		//mouse[0] movement
-
-		int mouse_track_x = mouse[0].locX;
-		int mouse_track_y = mouse[0].locY;
+		
+		for (char i = 0; i < mouseNumber; i++)
+		{
+			mouse[i].trackX = mouse[i].locX;
+			mouse[i].trackY = mouse[i].locY;
+		}
 
 		do
 
 		{
-			mouseMovement = (rand() % 4);
-
-			if (mouseMovement == 0) mouse[0].locY--;
-			if (mouseMovement == 1) mouse[0].locY++;
-			if (mouseMovement == 2) mouse[0].locX--;
-			if (mouseMovement == 3) mouse[0].locX++;
+			for (char i = 0; i < mouseNumber; i++)
 			
-			// mouse holes collision
-
-			for(i = 0; i < 10; i++)
 			{
-				if (IsCollisionObj(mouseHole[i], mouse[0])) holeCollis++, mouse[0].locX = mouseHole[rand() % 10].locX, mouse[0].locY = mouseHole[rand() % 10].locY + 1;
-			}	for(i = 0; i < 10; i++)
-			{
-				if (IsCollisionObj(mouseHole[i], mouse[0])) holeCollis++, mouse[0].locX = mouseHole[rand() % 10].locX, mouse[0].locY = mouseHole[rand() % 10].locY + 1;
+				mouseMovement = (rand() % 4);
+				if (mouseMovement == 0) mouse[i].locY--;
+				if (mouseMovement == 1) mouse[i].locY++;
+				if (mouseMovement == 2) mouse[i].locX--;
+				if (mouseMovement == 3) mouse[i].locX++;
 			}
-			if (IsCollisionObj(cat, mouse[0]) || IsBorderCollision(mouse[0])) mouse[0].locX = mouse_track_x, mouse[0].locY = mouse_track_y;
+				
+			// mouse hole collision
 
-			// mouse trap collision
+			for(char i = 0; i < mouseHNumber; i++)
+			{
+				for(char j = 0; j < mouseHNumber; j++)
+					{
+					if (IsCollisionObj(mouseHole[i], mouse[j], 0))
+						holeCollis++,
+						randomHole = (rand() % mouseHNumber),
+						mouse[j].locX = mouseHole[randomHole].locX, 
+						mouse[j].locY = mouseHole[randomHole].locY,
+						randomHole = 0;
+					}
+			}	
 
-			for (i = 0; i < 10; i++)
+			for (char i = 0; i < mouseNumber; i++)
+			{
+				if ((IsCollisionObj(cat, mouse[i], 0)) || IsBorderCollision(mouse[i])) mouse[i].locX = mouse[i].trackX, mouse[i].locY = mouse[i].trackY;
+
+			}
+			
+
+			// trap track
+
+			for (char i = 0; i < trapNumber; i++)
 			{
 
-				// trap actuation
+				//trap actuation
 
 				if (mouseTrap[i].status == 0)
 				{
-						if (IsCollisionObj(mouseTrap[i], mouse[0]))
+					for (char j = 0; j < mouseNumber; j++)
 					{
-						trapMouse++,
-						mouse[0].locX = rand() % (rightMB - 2) + 1, mouse[0].locY = rand() % (bottomMB - 2) + 1;
-						mouseTrap[i].status = 1;
+						if (IsCollisionObj(mouseTrap[i], mouse[j], 0))
+						{
+							trapMouse++,
+								mouse[j].locX = rand() % (rightMB - 2) + 1, mouse[j].locY = rand() % (bottomMB - 2) + 1;
+							mouseTrap[i].status = 1;
+						}
 					}
 
-					if (IsCollisionObj(mouseTrap[i], cat))
+					if (IsCollisionObj(mouseTrap[i], cat, 0))
 					{
 						trapCat++,
 						catLive --,
-						cat.locY = cat_track_y;
-						cat.locX = cat_track_x;
+						cat.locY = cat.trackY;
+						cat.locX = cat.trackX;
 						mouseTrap[i].status = 1;
 					}
 				}
@@ -281,12 +280,25 @@ int main()
 						mouseTrap[i].status = 0;
 					}
 
+				}
 			}
+			for (char i = 0; i < mouseNumber; i++)
+			{
+				if (mouse[i].locX == mouse[i].trackX && mouse[i].locY == mouse[i].trackY) mouseUnMove++;
 			}
 
-		} while (mouse[0].locX == mouse_track_x && mouse[0].locY == mouse_track_y);
+		} while (mouseUnMove < 0);
 
-		PutObject(&mouse);
+		mouseUnMove = 0;
+		
+		for (char i = 0; i < mouseNumber; i++)
+		{
+			PutObject(&mouse[i]);
+		}
+
+		//put cat on map
+
+		PutObject(&cat);
 
 		//printing
 
@@ -297,11 +309,13 @@ int main()
 		printf("Collisions: hole - %i; tCat - %i; tMouse %i \n", holeCollis, trapCat, trapMouse);
 		printf("Mouse movement and location %i,% i,%i \n", mouseMovement, mouse[0].locY, mouse[0].locX);
 		printf("Cat movement and location %i,%i \n", cat.locY, cat.locX);
-		Sleep(55);
+		Sleep(45);
 	}
 
 	while (GetKeyState(VK_ESCAPE) >= 0);
 
 	return 0;
 
+
 }
+

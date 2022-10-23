@@ -96,7 +96,7 @@ int main()
 
 {
 	int mouseMovement;
-	char key;
+	char key = 0;
 	int score = 0;
 	int holeCollis = 0;
 	int trapMouse = 0;
@@ -104,6 +104,7 @@ int main()
 	int catLive = 5;
 	int mouseUnMove = 0;
 	char randomHole;
+	char level = 0;
 
 
 	srand(time(0));
@@ -141,175 +142,220 @@ int main()
 		sprintf(mouse[i].icon[0], "<~");
 	}
 
-
 	do
 
 	{
-		// empty map creation
-
-		mapCreation();
-
-		//mouse holes putting on map
-
-		for (char i = 0; i < mouseHNumber; i++)
+		if (level == 0)
 		{
-			PutObject(&mouseHole[i]);
+			setcur(0, 0);
+			hidecursor();
+			printf("\n");
+			printf("Welcome to ""Catch mouse game"" you play as a cat and need to catch as much mouse as you can\n");
+			Sleep(1500);
+			printf("Use W A S D to move your cat\n");
+			Sleep(1500);
+			printf("Be careful traps _/ might damage you cat\n");
+			Sleep(1500);
+			printf("Mouse can go to any mouse hole and apear from any another mouse hole\n");
+			(1500);
+			printf("Good luck\n");
+			Sleep(5000);
+			level++;
 		}
 
-		//mouse trap putting on map
+		if (level == 1)
 
-		for (char i = 0; i < trapNumber; i++)
 		{
-			PutObject(&mouseTrap[i]);
-		}
 
-		//cat
+			// empty map creation
 
-		cat.trackX = cat.locX;
-		cat.trackY = cat.locY;
+			mapCreation();
 
-		if (GetKeyState('W') < 0) cat.locY--;
-		if (GetKeyState('S') < 0) cat.locY++;
-		if (GetKeyState('A') < 0) cat.locX--;
-		if (GetKeyState('D') < 0) cat.locX++;
+			//mouse holes putting on map
 
-		// border tracking for cat
-
-		if (IsBorderCollision(cat))
-		{
-			cat.locY = cat.trackY;
-			cat.locX = cat.trackX;
-		};
-
-		//mouses catch tracking and respawn
-
-		for (char i = 0; i < mouseNumber; i++)
-		{
-			if (IsCollisionObj(cat, mouse[i], 0))
+			for (char i = 0; i < mouseHNumber; i++)
 			{
-				do
-				{
-					mouse[i].locX = rand() % (rightMB - 2) + 1;
-					mouse[i].locY = rand() % (bottomMB - 2) + 1;
-				} while (IsCollisionObj(cat, mouse[i], 1));
-				score++;
+				PutObject(&mouseHole[i]);
 			}
-		}
 
-		//mouse[0] movement
-		
-		for (char i = 0; i < mouseNumber; i++)
-		{
-			mouse[i].trackX = mouse[i].locX;
-			mouse[i].trackY = mouse[i].locY;
-		}
-
-		do
-
-		{
-			for (char i = 0; i < mouseNumber; i++)
-			
-			{
-				mouseMovement = (rand() % 4);
-				if (mouseMovement == 0) mouse[i].locY--;
-				if (mouseMovement == 1) mouse[i].locY++;
-				if (mouseMovement == 2) mouse[i].locX--;
-				if (mouseMovement == 3) mouse[i].locX++;
-			}
-				
-			// mouse hole collision
-
-			for(char i = 0; i < mouseHNumber; i++)
-			{
-				for(char j = 0; j < mouseHNumber; j++)
-					{
-					if (IsCollisionObj(mouseHole[i], mouse[j], 0))
-						holeCollis++,
-						randomHole = (rand() % mouseHNumber),
-						mouse[j].locX = mouseHole[randomHole].locX, 
-						mouse[j].locY = mouseHole[randomHole].locY,
-						randomHole = 0;
-					}
-			}	
-
-			for (char i = 0; i < mouseNumber; i++)
-			{
-				if ((IsCollisionObj(cat, mouse[i], 0)) || IsBorderCollision(mouse[i])) mouse[i].locX = mouse[i].trackX, mouse[i].locY = mouse[i].trackY;
-
-			}
-			
-
-			// trap track
+			//mouse trap putting on map
 
 			for (char i = 0; i < trapNumber; i++)
 			{
+				PutObject(&mouseTrap[i]);
+			}
 
-				//trap actuation
+			//cat
 
-				if (mouseTrap[i].status == 0)
+			cat.trackX = cat.locX;
+			cat.trackY = cat.locY;
+
+			if (GetKeyState('W') < 0) cat.locY--;
+			if (GetKeyState('S') < 0) cat.locY++;
+			if (GetKeyState('A') < 0) cat.locX--;
+			if (GetKeyState('D') < 0) cat.locX++;
+
+			// border tracking for cat
+
+			if (IsBorderCollision(cat))
+			{
+				cat.locY = cat.trackY;
+				cat.locX = cat.trackX;
+			};
+
+			//mouses catch tracking and respawn
+
+			for (char i = 0; i < mouseNumber; i++)
+			{
+				if (IsCollisionObj(cat, mouse[i], 0))
 				{
-					for (char j = 0; j < mouseNumber; j++)
+					do
 					{
-						if (IsCollisionObj(mouseTrap[i], mouse[j], 0))
+						mouse[i].locX = rand() % (rightMB - 2) + 1;
+						mouse[i].locY = rand() % (bottomMB - 2) + 1;
+					} while (IsCollisionObj(cat, mouse[i], 1));
+					score++;
+				}
+			}
+
+			//mouse[0] movement
+
+			for (char i = 0; i < mouseNumber; i++)
+			{
+				mouse[i].trackX = mouse[i].locX;
+				mouse[i].trackY = mouse[i].locY;
+			}
+
+			do
+
+			{
+				for (char i = 0; i < mouseNumber; i++)
+
+				{
+					mouseMovement = (rand() % 4);
+					if (mouseMovement == 0) mouse[i].locY--;
+					if (mouseMovement == 1) mouse[i].locY++;
+					if (mouseMovement == 2) mouse[i].locX--;
+					if (mouseMovement == 3) mouse[i].locX++;
+				}
+
+				// mouse hole collision
+
+				for (char i = 0; i < mouseHNumber; i++)
+				{
+					for (char j = 0; j < mouseHNumber; j++)
+					{
+						if (IsCollisionObj(mouseHole[i], mouse[j], 0))
+							holeCollis++,
+							randomHole = (rand() % mouseHNumber),
+							mouse[j].locX = mouseHole[randomHole].locX,
+							mouse[j].locY = mouseHole[randomHole].locY,
+							randomHole = 0;
+					}
+				}
+
+				for (char i = 0; i < mouseNumber; i++)
+				{
+					if ((IsCollisionObj(cat, mouse[i], 0)) || IsBorderCollision(mouse[i])) mouse[i].locX = mouse[i].trackX, mouse[i].locY = mouse[i].trackY;
+
+				}
+
+
+				// trap track
+
+				for (char i = 0; i < trapNumber; i++)
+				{
+
+					//trap actuation
+
+					if (mouseTrap[i].status == 0)
+					{
+						for (char j = 0; j < mouseNumber; j++)
 						{
-							trapMouse++,
-								mouse[j].locX = rand() % (rightMB - 2) + 1, mouse[j].locY = rand() % (bottomMB - 2) + 1;
+							if (IsCollisionObj(mouseTrap[i], mouse[j], 0))
+							{
+								trapMouse++,
+									mouse[j].locX = rand() % (rightMB - 2) + 1, mouse[j].locY = rand() % (bottomMB - 2) + 1;
+								mouseTrap[i].status = 1;
+							}
+						}
+
+						if (IsCollisionObj(mouseTrap[i], cat, 0))
+						{
+							trapCat++,
+								catLive--,
+								cat.locY = cat.trackY;
+							cat.locX = cat.trackX;
 							mouseTrap[i].status = 1;
 						}
 					}
 
-					if (IsCollisionObj(mouseTrap[i], cat, 0))
+					// trap tracking
+
+					if (mouseTrap[i].status > 0)
 					{
-						trapCat++,
-						catLive --,
-						cat.locY = cat.trackY;
-						cat.locX = cat.trackX;
-						mouseTrap[i].status = 1;
+						map[mouseTrap[i].locY][mouseTrap[i].locX] = "X";
+						mouseTrap[i].status++;
+						if (mouseTrap[i].status == 50)
+						{
+							mouseTrap[i].locX = rand() % (rightMB - 2) + 1, mouseTrap[i].locY = rand() % (bottomMB - 2) + 1;
+							mouseTrap[i].status = 0;
+						}
+
 					}
 				}
-
-				// trap tracking
-
-				if (mouseTrap[i].status > 0)
+				for (char i = 0; i < mouseNumber; i++)
 				{
-					map[mouseTrap[i].locY][mouseTrap[i].locX] = "X";
-					mouseTrap[i].status++;
-					if (mouseTrap[i].status == 50)
-					{
-						mouseTrap[i].locX = rand() % (rightMB - 2) + 1, mouseTrap[i].locY = rand() % (bottomMB - 2) + 1;
-						mouseTrap[i].status = 0;
-					}
-
+					if (mouse[i].locX == mouse[i].trackX && mouse[i].locY == mouse[i].trackY) mouseUnMove++;
 				}
-			}
+
+			} while (mouseUnMove < 0);
+
+			mouseUnMove = 0;
+
 			for (char i = 0; i < mouseNumber; i++)
 			{
-				if (mouse[i].locX == mouse[i].trackX && mouse[i].locY == mouse[i].trackY) mouseUnMove++;
+				PutObject(&mouse[i]);
 			}
 
-		} while (mouseUnMove < 0);
+			//put cat on map
 
-		mouseUnMove = 0;
-		
-		for (char i = 0; i < mouseNumber; i++)
-		{
-			PutObject(&mouse[i]);
+			PutObject(&cat);
+
+			//printing
+
+			setcur(0, 0);
+			hidecursor();
+			printf("Mouse caught %i; cat health %i \n", score, catLive);
+			showMap();
+			//printf("Collisions: hole - %i; tCat - %i; tMouse %i \n", holeCollis, trapCat, trapMouse);
+			//printf("Mouse movement and location %i,% i,%i \n", mouseMovement, mouse[0].locY, mouse[0].locX);
+			//printf("Cat movement and location %i,%i \n", cat.locY, cat.locX);
+			Sleep(45);
+			if (catLive <= 0) level = 99;
 		}
 
-		//put cat on map
+		if (level == 99)
+		{
+			if (key == 0)
+				{
+				system("cls");
+				key++;
+			}
+			setcur(0, 0);
+			hidecursor();
+			printf("Your cat is out of heals, Your score %i \n", score);
+			printf("Press R to restart\n");
+			if (GetKeyState('R') < 0)
+			{
+				level = 1;
+				catLive = 5;
+				score = 0;
+				system("cls");
+				key = 0;
+			}
+		}
 
-		PutObject(&cat);
-
-		//printing
-
-		setcur(0, 0);
-		hidecursor();
-		printf("Mouse caught %i; cat health %i \n", score, catLive);
-		showMap();
-		printf("Collisions: hole - %i; tCat - %i; tMouse %i \n", holeCollis, trapCat, trapMouse);
-		printf("Mouse movement and location %i,% i,%i \n", mouseMovement, mouse[0].locY, mouse[0].locX);
-		printf("Cat movement and location %i,%i \n", cat.locY, cat.locX);
-		Sleep(45);
 	}
 
 	while (GetKeyState(VK_ESCAPE) >= 0);

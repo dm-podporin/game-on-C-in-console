@@ -149,18 +149,26 @@ int main()
 		{
 			setcur(0, 0);
 			hidecursor();
-			printf("\n");
-			printf("Welcome to ""Catch mouse game"" you play as a cat and need to catch as much mouse as you can\n");
+			printf("Welcome to ""Catch mouse game"". In thia game you play as a cat who need to catch as much mouse as it can\n");
+			printf("Before launching this game please change you console to have Window more then 120x57 (Width/Height), so game will work correctly\n");
 			Sleep(1500);
+			printf("\n");
 			printf("Use W A S D to move your cat\n");
 			Sleep(1500);
 			printf("Be careful traps _/ might damage you cat\n");
 			Sleep(1500);
 			printf("Mouse can go to any mouse hole and apear from any another mouse hole\n");
-			(1500);
+			Sleep(1500);
 			printf("Good luck\n");
-			Sleep(5000);
-			level++;
+			Sleep(1500);
+			printf("Press Q to start\n");
+
+			if (GetKeyState('Q') < 0)
+			{
+				level = 1;
+				system("cls");
+
+			};
 		}
 
 		if (level == 1)
